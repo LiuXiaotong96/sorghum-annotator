@@ -12,8 +12,8 @@ class CanvasPanel(wx.ScrolledCanvas):
         self.mask = None
         self.mainImage = None
         self.SetScrollRate(20, 20)
-        self.maxWidth  = 1000
-        self.maxHeight = 500
+        self.maxWidth  = 3000
+        self.maxHeight = 3000
         self.SetVirtualSize((self.maxWidth, self.maxHeight))
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -33,6 +33,8 @@ class CanvasPanel(wx.ScrolledCanvas):
     #    self.Canvas.AddScaledBitmap(Image, (0,0), Height = Image.GetAlpha())
     def setImage(self, image):
         self.mainImage = image
+        self.maxWidth = round(image.GetWidth()*1.2)
+        self.maxHeight = round(image.GetHeight()*1.2)
     def setMask(self, mask):
         self.mask = mask
     def OnPaint(self, evt):
@@ -49,7 +51,7 @@ class CanvasPanel(wx.ScrolledCanvas):
         image= self.mainImage.AdjustChannels(1.0, 1.0, 1.0, 1.0)
         bitmap= wx.Bitmap(image)
         dc.DrawBitmap(bitmap, 0, 0, True)
-        image= self.mask.AdjustChannels(150.0, 150.0, 30.0, 0.2)
+        image= self.mask.AdjustChannels(20.0, 255.0, 255.0, 0.2)
         bitmap= wx.Bitmap(image)
         dc.DrawBitmap(bitmap, 0, 0, True)
         #dc.DrawBitmap(wx.Bitmap(self.mainImage),-1,-1,True)
