@@ -21,8 +21,8 @@ class Segmap():
             self.logger.error('Wrong length of shape')
 
         self.sorghumMap = self.segmapImage[:,:,0]
-        self.stemMap = self.segmapImage[:,:,1]
-        self.leafMap = self.segmapImage[:,:,2]
+        self.stemMap = self.segmapImage[:,:,2]
+        self.leafMap = self.segmapImage[:,:,1]
 #        self.alphaCh = segmapImage[:,:,3]
         self.sorghumList = sorghumList
         self.leafIdList = leafList
@@ -129,7 +129,8 @@ class Segmap():
             if leafId in sorghum.leafIdList:
                 sorghum.leafIdList.remove(leafId)
         self.leafIdList.remove(leafId)
-
+    def getLeafMaskById(self, leafId):
+        return ~(self.leafMap == leafId) *255
     def modifySorghum(self, id, modifiedArea):
         pass
 
@@ -175,7 +176,7 @@ class Segmap():
 
     def updateSegmapImage(self):
         self.logger.debug('type before dstack: %s', self.segmapImage.dtype)
-        self.segmapImage = np.dstack((self.sorghumMap, self.stemMap, self.leafMap)).astype('uint8')
+        self.segmapImage = np.dstack((self.sorghumMap, self.leafMap, self.stemMap)).astype('uint8')
         self.logger.debug('type after dstack: %s', self.segmapImage.dtype)
 
     def getIdOnPos(self, x, y, type='sorghum'):
