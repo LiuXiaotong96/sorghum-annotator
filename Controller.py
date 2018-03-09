@@ -268,13 +268,13 @@ class Controller():
         self.opStack.clear()
 
     def OnThresholdSliderChange(self, evt):
-        self.curThreshold = self.view.thresholdSlider.GetValue()
-        self.view.thresholdTextCtrl.SetValue(str(self.curThreshold))
+        self.curThreshold = int(self.view.thresholdSlider.GetValue()/5)
+        self.view.thresholdTextCtrl.SetValue(str(self.view.thresholdSlider.GetValue()))
         #self.logger.debug('Threshold changed. Threshold: %d', self.curThreshold)
 
     def OnThresholdTextChange(self, evt):
-        self.curThreshold = int(self.view.thresholdTextCtrl.GetValue())
-        self.view.thresholdSlider.SetValue(int(self.curThreshold))
+        self.curThreshold = int(self.view.thresholdTextCtrl.GetValue()/5)
+        self.view.thresholdSlider.SetValue(int(self.view.thresholdTextCtrl.GetValue()))
         #self.logger.debug('Threshold changed. Threshold: %d', self.curThreshold)
 
     def OnFileChange(self, evt):
