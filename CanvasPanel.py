@@ -5,45 +5,59 @@ from scipy import misc
 
 import wx
 
-class CanvasPanel(wx.Window):
+class CanvasPanel(wx.ScrolledCanvas):
     def __init__(self, *args, **kw):
-        wx.Panel.__init__(self, *args, **kw)
+        #wx.Panel.__init__(self, *args, **kw)
+        wx.ScrolledCanvas.__init__(self, *args, **kw)
         self.mask = None
         self.mainImage = None
+        self.SetScrollRate(20, 20)
+        self.maxWidth  = 1000
+        self.maxHeight = 500
+        self.SetVirtualSize((self.maxWidth, self.maxHeight))
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
-
+        self.Bind(wx.EVT_MOTION, self.OnSize)
         #self.bmp = wx.Bitmap(28,28,32)
         #print(self.mask.IsOk())
         #self.bmp = self.MakeMask(self.mask, 32)
-    def LoadImage(self, filename):
-        Image = wx.Image(filename)
-        self.Canvas.AddScaledBitmap(Image, (0,0), Height = Image.GetAlpha())
+    def SetScale(self, xs, ys):
+        super().SetScale(xs, ys)
+        maxWidth = self.maxWidth  * xs
+        maxHeight = self.maxHeight * ys
+        self.SetVirtualSize(maxWidth, maxHeight)
+    #def LoadImage(self, filename):
+    #    Image = wx.Image(filename)
+    #    self.Canvas.AddScaledBitmap(Image, (0,0), Height = Image.GetAlpha())
     def setImage(self, image):
         self.mainImage = image
     def setMask(self, mask):
         self.mask = mask
     def OnPaint(self, evt):
+        print("OnPAint")
         dc = wx.PaintDC(self)
         dc = wx.BufferedDC(dc)
+        self.PrepareDC(dc)
+        #dc.SetUserScale(3.0, 3.0)
         dc.SetBackground(wx.Brush("WHITE"))
         dc.Clear()
         dc.SetBrush(wx.Brush("GREY", wx.BRUSHSTYLE_CROSSDIAG_HATCH))
         windowsize= self.GetSize()
-        dc.DrawRectangle(0, 0, windowsize[0], windowsize[1])
-        print(self.mask)
+        dc.DrawRectangle(0, 0, self.maxWidth, self.maxHeight)
         image= self.mainImage.AdjustChannels(1.0, 1.0, 1.0, 1.0)
         bitmap= wx.Bitmap(image)
         dc.DrawBitmap(bitmap, 0, 0, True)
-        image= self.mask.AdjustChannels(1.0, 1.0, 1.0, 0.2)
+        image= self.mask.AdjustChannels(150.0, 150.0, 30.0, 0.2)
         bitmap= wx.Bitmap(image)
         dc.DrawBitmap(bitmap, 0, 0, True)
         #dc.DrawBitmap(wx.Bitmap(self.mainImage),-1,-1,True)
         #dc.DrawBitmap(wx.Bitmap(self.mask), 25, 25, True)
     def OnLeftDown(self, evt):
         print(evt.GetPosition())
+        if evt.Dragging():
+            print('DRAGGING')
         return
 
     def OnLeftUp(self, evt):
@@ -65,6 +79,12 @@ class CanvasPanel(wx.Window):
                 pixels.Set(255,0,0,alpha)
                 pixels.nextPixel()
         return bitmap
+
+    def CalcGlobalPosition(self, posX, posY):
+        x, y = self.CalcUnscrolledPosition(posX, posY)
+        x = round(x / self.GetScaleX())
+        y = round(y / self.GetScaleY())
+        return (x, y)
 
 
 if __name__ == '__main__':

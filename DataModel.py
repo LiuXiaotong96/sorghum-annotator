@@ -2,6 +2,8 @@ import os
 import wx
 from scipy import misc
 import numpy as np
+import pickle
+import Segmap
 class DataModel():
 
     def __init__(self, imageRoot, segmapRoot):
@@ -28,14 +30,25 @@ class DataModel():
         return segmap
 
     def saveSegmap(self,segmap, name):
-        pass
-
+        misc.imsave(os.path.join(self.segmapRoot,name), segmap.segmapImage)
+        pklName = name[0:-4] + '.pkl'
+        with open(os.path.join(self.segmapRoot,pklName), 'wb') as f:
+            pickle.dump(segmap.sorghumList, f)
+    def loadDependcy(self, name):
+        pklName = name[0:-4] + '.pkl'
+        if not os.path.isfile(os.path.join(self.segmapRoot, name)):
+            return []
+        if not os.path.isfile(os.path.join(self.segmapRoot, pklName)):
+            return []
+        with open(os.path.join(self.segmapRoot,pklName), 'rb') as f:
+            loaded = pickle.load(f)
+        return loaded
     def npyToBitmap(self, image):
-        image = image[:,:,0:3]
-        print(image.shape)
         if len(image.shape) == 2:
             height, width = image.shape
+            image = np.dstack([image, image, image])
         if len(image.shape) == 3:
+            image = image[:,:,0:3]
             height, width,_ = image.shape
         bitmapImage = wx.Image(width,height)
         bitmapImage.SetData( image.tostring())
