@@ -12,6 +12,7 @@ class DataModel():
         self.imageNameList = os.listdir(self.imageRoot);
         self.imageList = []
         self.segmapList = []
+        self.getImageList()
 
     def getImageList(self):
         for name in self.imageNameList:

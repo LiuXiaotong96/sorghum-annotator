@@ -2,24 +2,23 @@ import wx
 from wx.lib.floatcanvas import NavCanvas, FloatCanvas
 import numpy
 from scipy import misc
+from DataModel import DataModel
 
-import wx
-
-class CanvasPanel(wx.ScrolledCanvas):
-    def __init__(self, *args, **kw):
+class CanvasPanel(wx.lib.floatcanvas.NavCanvas.NavCanvas):
+    def __init__(self, parent, BackgroundColor = "DARK SLATE BLUE"):
         #wx.Panel.__init__(self, *args, **kw)
-        wx.ScrolledCanvas.__init__(self, *args, **kw)
+        NavCanvas.NavCanvas.__init__(self, parent, Debug=1, BackgroundColor=BackgroundColor)
         self.mask = None
         self.mainImage = None
-        self.SetScrollRate(20, 20)
+        #self.SetScrollRate(20, 20)
         self.maxWidth  = 3000
         self.maxHeight = 3000
-        self.SetVirtualSize((self.maxWidth, self.maxHeight))
-        self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
-        self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
-        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
-        #self.Bind(wx.EVT_MOTION, self.OnSize)
+        #self.SetVirtualSize((self.maxWidth, self.maxHeight))
+        #self.Bind(wx.EVT_SIZE, self.OnSize)
+        #self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Canvas.Bind(FloatCanvas.EVT_LEFT_DOWN, self.OnLeftDown)
+        #self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        self.Bind(FloatCanvas.EVT_MOTION, self.OnMouseMove)
         #self.bmp = wx.Bitmap(28,28,32)
         #print(self.mask.IsOk())
         #self.bmp = self.MakeMask(self.mask, 32)
@@ -46,7 +45,6 @@ class CanvasPanel(wx.ScrolledCanvas):
         dc.SetBackground(wx.Brush("WHITE"))
         dc.Clear()
         dc.SetBrush(wx.Brush("GREY", wx.BRUSHSTYLE_CROSSDIAG_HATCH))
-        windowsize= self.GetSize()
         dc.DrawRectangle(0, 0, self.maxWidth, self.maxHeight)
         image= self.mainImage.AdjustChannels(1.0, 1.0, 1.0, 1.0)
         bitmap= wx.Bitmap(image)
@@ -66,6 +64,8 @@ class CanvasPanel(wx.ScrolledCanvas):
         return
 
     def OnMouseMove(self, evt):
+        if evt.Dragging():
+            print('Dragging: %s', evt.Coords)
         return
 
     def OnSize(self, evt):
@@ -92,7 +92,20 @@ class CanvasPanel(wx.ScrolledCanvas):
 if __name__ == '__main__':
     app = wx.App(redirect=False)
     frm = wx.Frame(None, title="wx.Overlay Test", size=(450, 450))
+
+    dataModel = DataModel('./images', './segmaps')
+    segmap = dataModel.getSegmapByIdx(0)
+    image = dataModel.getImageByIdx(0)
+    imageBitmap = dataModel.npyToBitmap(image)
+    segmapBitmap = dataModel.npyToBitmap(segmap)
+    segmapBitmap = segmapBitmap.AdjustChannels(20.0, 255.0, 255.0, 0.2)
     # frm.SetDoubleBuffered(True)
     pnl = CanvasPanel(frm)
+    print(imageBitmap.GetHeight(), ',' , imageBitmap.GetWidth())
+    imageObj = pnl.Canvas.AddScaledBitmap(imageBitmap, (0, 0), Height = imageBitmap.GetHeight(), Position = 'bl')
+    #pnl.Canvas.RemoveObject(imageObj, False)
+    pnl.Canvas.AddScaledBitmap(segmapBitmap, (0, 0), Height = segmapBitmap.GetHeight(), Position = 'bl')
+    #pnl.setImage(dataModel.npyToBitmap(image))
+    #pnl.setMask(dataModel.npyToBitmap(segmap))
     frm.Show()
     app.MainLoop()

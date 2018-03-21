@@ -12,7 +12,6 @@ from scipy import misc
 class Controller():
     def __init__(self):
         self.dataModel = DataModel('./images', './segmaps')
-        self.dataModel.getImageList()
         self.opStack=[]
         self.app = wx.App()
         self.view = View(None)
