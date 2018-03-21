@@ -7,7 +7,7 @@
     3. lxml
     4. PIL or Pillow
 ## Usage
-Overall, this software if for hierarchy sorghum annotation. We assume all sorghums have only one stem and several leaves. To annotate one sorghum, you should start from the stem, then leaves.
+Overall, this software is for hierarchy sorghum annotation. We assume all sorghums have only one stem and several leaves. To annotate one sorghum, you should start from the stem, then leaves.
 ### 1. Stem annotation
 We assume the shape of all sorghum stems are quadrilateral. To mark out the stem, just click the 4 corners of the stem.
 ### 2. Leaves annotation
