@@ -11,6 +11,7 @@ class CanvasPanel(wx.ScrolledCanvas):
         wx.ScrolledCanvas.__init__(self, *args, **kw)
         self.mask = None
         self.mainImage = None
+        self.focusMask = None
         self.SetScrollRate(20, 20)
         self.maxWidth  = 3000
         self.maxHeight = 3000
@@ -35,6 +36,8 @@ class CanvasPanel(wx.ScrolledCanvas):
         self.mainImage = image
         self.maxWidth = round(image.GetWidth()*1.2)
         self.maxHeight = round(image.GetHeight()*1.2)
+    def setFocusMask(self, mask):
+        self.focusMask = mask
     def setMask(self, mask):
         self.mask = mask
     def OnPaint(self, evt):
@@ -46,14 +49,21 @@ class CanvasPanel(wx.ScrolledCanvas):
         dc.SetBackground(wx.Brush("WHITE"))
         dc.Clear()
         dc.SetBrush(wx.Brush("GREY", wx.BRUSHSTYLE_CROSSDIAG_HATCH))
-        windowsize= self.GetSize()
+        windowsize = self.GetSize()
         dc.DrawRectangle(0, 0, self.maxWidth, self.maxHeight)
-        image= self.mainImage.AdjustChannels(1.0, 1.0, 1.0, 1.0)
-        bitmap= wx.Bitmap(image)
+        image = self.mainImage.AdjustChannels(1.0, 1.0, 1.0, 1.0)
+        bitmap = wx.Bitmap(image)
         dc.DrawBitmap(bitmap, 0, 0, True)
-        image= self.mask.AdjustChannels(20.0, 255.0, 255.0, 0.2)
-        bitmap= wx.Bitmap(image)
+        image = self.mask.AdjustChannels(20.0, 255.0, 255.0, 0.2)
+        bitmap = wx.Bitmap(image)
         dc.DrawBitmap(bitmap, 0, 0, True)
+
+
+        image = self.focusMask.AdjustChannels(1.0, 1.0, 1.0, 0.3)
+        bitmap = wx.Bitmap(image)
+        dc.DrawBitmap(bitmap, 0, 0, True)
+
+
         #dc.DrawBitmap(wx.Bitmap(self.mainImage),-1,-1,True)
         #dc.DrawBitmap(wx.Bitmap(self.mask), 25, 25, True)
     def OnLeftDown(self, evt):
