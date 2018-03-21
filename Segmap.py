@@ -130,7 +130,11 @@ class Segmap():
                 sorghum.leafIdList.remove(leafId)
         self.leafIdList.remove(leafId)
     def getLeafMaskById(self, leafId):
-        return ~(self.leafMap == leafId) *255
+        mask = (self.leafMap == leafId) * 255
+        return mask.astype('uint8')
+    def getSorghumMaskById(self, sorghumId):
+        mask = (self.sorghumMap == sorghumId) * 255
+        return mask.astype('uint8')
     def modifySorghum(self, id, modifiedArea):
         pass
 

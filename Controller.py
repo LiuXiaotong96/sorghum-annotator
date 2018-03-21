@@ -35,6 +35,8 @@ class Controller():
         self.curThreshold = self.view.thresholdSlider.GetValue()
         self.curSorghumId = None
         self.curLeafId = None
+        self.curSelectedId = -1
+        self.curSelectedType = 'sorghum'
         self.curZoom = 1.0
         self.leafSA = SelectedArea(np.zeros((self.curSegmap.height, self.curSegmap.width)), type=SelectedArea.TYPE_LEAF)
         self.stemSA = SelectedArea(np.zeros((self.curSegmap.height, self.curSegmap.width)), type=SelectedArea.TYPE_STEM)
@@ -59,8 +61,10 @@ class Controller():
         self.refreshTree()
         init_image = self.dataModel.npyToBitmap(self.curImage)
         init_mask = self.dataModel.npyToBitmap(self.curSegmap.segmapImage)
+        init_focusMask = self.dataModel.npyToBitmap(self.curSegmap.getSorghumMaskById(-1))
         self.view.canvasPanel.setImage(init_image)
         self.view.canvasPanel.setMask(init_mask)
+        self.view.canvasPanel.setFocusMask(init_focusMask)
         self.app.MainLoop()
     def changeTool(self, tool):
         self.curTool = tool
@@ -108,8 +112,9 @@ class Controller():
                 self.logger.debug('Id update after new Sorghum: %d', self.stemSA.id)
                 self.view.sorghumTreeCtrl.AppendItem(self.view.sorghumTreeRoot, 'Sorghum_%d' % (self.stemSA.id), data=['sorghum', self.stemSA.id])
                 treeNewSorghum = self.view.sorghumTreeCtrl.GetLastChild(self.view.sorghumTreeRoot)
-                self.view.sorghumTreeCtrl.SetFocusedItem(treeNewSorghum)
-                self.view.canvasPanel.Refresh()
+                self.view.sorghumTreeCtrl.SelectItem(treeNewSorghum)
+                #self.view.canvasPanel.Refresh()
+                self.refreshCanvas()
                 self.opStack.clear()
                 self.stemSA.clear()
                 #self.refreshTree()
@@ -127,7 +132,8 @@ class Controller():
             self.curLeafId =leafId
             self.dataModel.saveSegmap(self.curSegmap, self.curImageName)
             self.view.canvasPanel.setMask(self.dataModel.npyToBitmap(self.curSegmap.segmapImage))
-            self.view.canvasPanel.Refresh()
+            #self.view.canvasPanel.Refresh()
+            self.refreshCanvas()
             self.leafSA.clear()
             treeItem = self.view.sorghumTreeCtrl.GetFocusedItem()
             treeItemData = self.view.sorghumTreeCtrl.GetItemData(treeItem)
@@ -136,7 +142,8 @@ class Controller():
             else:
                 addRoot = self.view.sorghumTreeCtrl.GetItemParent(treeItem)
             parentSorghumId = self.curSegmap.getLeafParent(leafId)
-            self.view.sorghumTreeCtrl.AppendItem(addRoot, 'Leaf_%d' % (leafId), data=['leaf', parentSorghumId, leafId])
+            newLeafNode = self.view.sorghumTreeCtrl.AppendItem(addRoot, 'Leaf_%d' % (leafId), data=['leaf', parentSorghumId, leafId])
+            self.view.sorghumTreeCtrl.SelectItem(newLeafNode)
             #self.refreshTree()
             # change segmap
             # save segmap
@@ -149,7 +156,8 @@ class Controller():
             self.curSegmap.modifyLeaf(self.curLeafId, self.leafSA, mode='add')
             self.dataModel.saveSegmap(self.curSegmap, self.curImageName)
             self.view.canvasPanel.setMask(self.dataModel.npyToBitmap(self.curSegmap.segmapImage))
-            self.view.canvasPanel.Refresh()
+            #self.view.canvasPanel.Refresh()
+            self.refreshCanvas()
             self.leafSA.clear()
             pass
         elif self.curTool == self.TOOL_LEAF_MINUS:
@@ -159,7 +167,8 @@ class Controller():
             self.curSegmap.modifyLeaf(self.curLeafId, self.leafSA, mode='minus')
             self.dataModel.saveSegmap(self.curSegmap, self.curImageName)
             self.view.canvasPanel.setMask(self.dataModel.npyToBitmap(self.curSegmap.segmapImage))
-            self.view.canvasPanel.Refresh()
+            #self.view.canvasPanel.Refresh()
+            self.refreshCanvas()
             self.leafSA.clear()
             pass
         elif self.curTool == self.TOOL_LEAF_LASSO_MINUS:
@@ -178,7 +187,8 @@ class Controller():
             scrollY = round( curY + (newPos[1] * 0.1) / scrollRate[1] )
             self.logger.debug("scrolled pos: %s, %s", scrollX, scrollY)
             self.view.canvasPanel.Scroll(scrollX, scrollY)
-            self.view.canvasPanel.Refresh()
+            #self.view.canvasPanel.Refresh()
+            self.refreshCanvas()
             pass
         elif self.curTool == self.TOOL_ZOOM_OUT:
             perPos = self.view.canvasPanel.CalcUnscrolledPosition(evt.GetX(), evt.GetY())
@@ -193,12 +203,14 @@ class Controller():
             scrollY = round( curY - (newPos[1] * 0.1) / scrollRate[1] )
             self.logger.debug("scrolled pos: %s, %s", scrollX, scrollY)
             self.view.canvasPanel.Scroll(scrollX, scrollY)
-            self.view.canvasPanel.Refresh()
+            #self.view.canvasPanel.Refresh()
+            self.refreshCanvas()
             pass
         elif self.curTool == self.TOOL_ZOOM_BACK:
             self.curZoom = 1.0
             self.view.canvasPanel.SetScale(self.curZoom, self.curZoom)
-            self.view.canvasPanel.Refresh()
+            #self.view.canvasPanel.Refresh()
+            self.refreshCanvas()
 
     def OnCanvasMotion(self, evt):
         pos = self.view.canvasPanel.CalcGlobalPosition(evt.GetX(), evt.GetY())
@@ -212,7 +224,8 @@ class Controller():
                 self.curSegmap.modifyLeaf(self.curLeafId, sA, mode='minus')
                 self.dataModel.saveSegmap(self.curSegmap, self.curImageName)
                 self.view.canvasPanel.setMask(self.dataModel.npyToBitmap(self.curSegmap.segmapImage))
-                self.view.canvasPanel.Refresh()
+                #self.view.canvasPanel.Refresh()
+                self.refreshCanvas()
             elif self.curTool == self.TOOL_LEAF_LASSO_MINUS:
                 self.opStack.append(list(pos))
                 pass
@@ -229,7 +242,8 @@ class Controller():
             self.leafSA.clear()
             self.dataModel.saveSegmap(self.curSegmap, self.curImageName)
             self.view.canvasPanel.setMask(self.dataModel.npyToBitmap(self.curSegmap.segmapImage))
-            self.view.canvasPanel.Refresh()
+            #self.view.canvasPanel.Refresh()
+            self.refreshCanvas()
             self.opStack.clear()
             pass
 
@@ -239,6 +253,13 @@ class Controller():
         mask = self.dataModel.npyToBitmap(self.curSegmap.segmapImage)
         self.view.canvasPanel.setImage(image)
         self.view.canvasPanel.setMask(mask)
+        self.logger.debug("Refresh Canvas")
+        if self.curSelectedType == 'sorghum':
+            focusMask = self.dataModel.npyToBitmap(self.curSegmap.getSorghumMaskById(self.curSelectedId))
+            self.view.canvasPanel.setFocusMask(focusMask)
+        elif self.curSelectedType == 'leaf':
+            focusMask = self.dataModel.npyToBitmap(self.curSegmap.getLeafMaskById(self.curSelectedId))
+            self.view.canvasPanel.setFocusMask(focusMask)
         self.view.canvasPanel.Refresh()
     def refreshTree(self):
         self.view.sorghumTreeCtrl.DeleteChildren(self.view.sorghumTreeRoot)
@@ -303,10 +324,15 @@ class Controller():
                 firstLeafId = self.view.sorghumTreeCtrl.GetItemData(firstChild)[2]
             else :
                 self.curLeafId = None
+            self.curSelectedType = 'sorghum'
+            self.curSelectedId = itemData[1]
         if itemData[0] == 'leaf':
             self.logger.debug('Changing item to: (sorghumId: %s, leafId: %s)', itemData[1], itemData[2])
             self.curSorghumId = itemData[1]
             self.curLeafId = itemData[2]
+            self.curSelectedType = 'leaf'
+            self.curSelectedId = itemData[2]
+        self.refreshCanvas()
         self.logger.debug('Change item to: (sorghumId: %s, leafId: %s)', self.curSorghumId, self.curLeafId)
         self.logger.debug('sorghum: %s, sorghumId: %s, sorghum children: %s', self.curSegmap.getSorghumById(self.curSorghumId), self.curSegmap.getSorghumById(self.curSorghumId).sorghumId, self.curSegmap.getSorghumById(self.curSorghumId).leafIdList)
         self.logger.debug('leafIdListId: %s', id(self.curSegmap.getSorghumById(self.curSorghumId)))
