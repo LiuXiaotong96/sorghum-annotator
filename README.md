@@ -14,9 +14,11 @@ python ./main.py
 ```
 ## Usage
 Overall, this software is for hierarchy sorghum annotation. We assume all sorghums have only one stem and several leaves. To annotate one sorghum, you should start from the stem, then leaves.
-### 1. Stem annotation
+###  Image import
+To import images, put the images under the images folder.
+###  Stem annotation
 We assume the shape of all sorghum stems are quadrilateral. To mark out the stem, just click the 4 corners of the stem.
-### 2. Leaves annotation
+###  Leaves annotation
 There are two set of tools to help you mark out leaves:  **magic wand** and **lasso**.
 There are 3 different type of magic wand that you can use to annotate leaves:
 1. New leaf
