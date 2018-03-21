@@ -1,11 +1,17 @@
 # sorghum-annotator
 ## Dependency 
+  * python 3.x
   * wxpython
   * Packages you may not have:
     1. numpy
     2. scipy
     3. lxml
     4. PIL or Pillow
+## Installation 
+```sh
+git clone https://github.com/Andrewzhzy/sorghum-annotator.git
+python ./main.py
+```
 ## Usage
 Overall, this software is for hierarchy sorghum annotation. We assume all sorghums have only one stem and several leaves. To annotate one sorghum, you should start from the stem, then leaves.
 ### 1. Stem annotation
