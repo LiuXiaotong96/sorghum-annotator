@@ -22,6 +22,7 @@ class SegTool:
         if queue is None:
             queue = Queue.Queue();
             queue.put([click_x,click_y]);
+        counter = 0
         while (not queue.empty()):
             center = queue.get();
             neighbour = SegTool.getneighbourpixel(pointmap,center[0],center[1],mode);
@@ -40,11 +41,13 @@ class SegTool:
                     #if diff<threshold and ((modepoint and pointmap.item((neighbour[i][0],neighbour[i][1]))==0) or (not modepoint and pointmap.item((neighbour[i][0],neighbour[i][1]))==ID)):
                     if diff < threshold :
                         queue.put(neighbour[i]);
+                        counter += 1
                         x = neighbour[i][0]
                         y = neighbour[i][1]
                         newpointmap[x][y]=1;
                         checkmap[neighbour[i][0],neighbour[i][1]] = 7;    
-                    checkmap[neighbour[i][0], neighbour[i][1]] = checkmap[neighbour[i][0], neighbour[i][1]] + 1; 
+                    checkmap[neighbour[i][0], neighbour[i][1]] = checkmap[neighbour[i][0], neighbour[i][1]] + 1;
+        print(counter)
         return newpointmap
 
     def lasso(im, pointList):

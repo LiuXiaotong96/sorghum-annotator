@@ -303,8 +303,12 @@ class Controller():
         self.logger.debug('File changed to: %d', self.curImageIdx)
         self.curImageName = self.dataModel.imageNameList[self.curImageIdx]
         self.curImage = self.dataModel.getImageByIdx(self.curImageIdx)
-        self.curSegmap = Segmap(self.dataModel.getSegmapByIdx(self.curImageIdx))
+        self.curSegmap = Segmap(self.dataModel.getSegmapByIdx(self.curImageIdx),  self.dataModel.loadDependcy(self.curImageName))
         self.refreshTree()
+        if self.view.sorghumTreeCtrl.ItemHasChildren(self.view.sorghumTreeCtrl.GetRootItem()):
+            self.view.sorghumTreeCtrl.SelectItem(self.view.sorghumTreeCtrl.GetFirstChild(self.view.sorghumTreeCtrl.GetRootItem())[0])
+        else:
+            self.view.sorghumTreeCtrl.SelectItem(self.view.sorghumTreeCtrl.GetRootItem())
         self.refreshCanvas()
 
     def OnTreeRightDown(self, evt):
