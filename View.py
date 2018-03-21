@@ -2,6 +2,7 @@ import wx
 import wx.xrc
 from wx.lib.evtmgr import eventManager
 from CanvasPanel import CanvasPanel
+import platform
 
 class View ( wx.Frame ):
 
@@ -31,10 +32,12 @@ class View ( wx.Frame ):
         self.thresholdLabel = wx.StaticText( self.horToolBar, wx.ID_ANY, u"Threshold", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.thresholdLabel.Wrap( -1 )
         self.horToolBar.AddControl( self.thresholdLabel )
-        self.thresholdSlider = wx.Slider( self.horToolBar, wx.ID_ANY, 20, 0, 100, wx.DefaultPosition, wx.DefaultSize, wx.SL_HORIZONTAL )
+        self.thresholdSlider = wx.Slider( self.horToolBar, wx.ID_ANY, 20, 0, 100, wx.DefaultPosition, wx.Size(100, -1), wx.SL_HORIZONTAL )
         self.thresholdSlider.Bind(wx.EVT_SLIDER, self.thresholdSliderChange)
         self.horToolBar.AddControl( self.thresholdSlider )
-        self.thresholdTextCtrl = wx.TextCtrl( self.horToolBar, wx.ID_ANY, "20", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
+        self.thresholdTextCtrl = wx.TextCtrl( self.horToolBar, wx.ID_ANY, "20", wx.DefaultPosition, wx.Size(20,-1), 0 )
+        if platform.system() == 'Linux':
+            self.thresholdTextCtrl.SetSize(wx.Size(35, -1))
         self.thresholdTextCtrl.SetMaxLength( 2 )
         self.thresholdTextCtrl.Bind(wx.EVT_TEXT_ENTER, self.thresholdTextChange)
         self.horToolBar.AddControl( self.thresholdTextCtrl )
