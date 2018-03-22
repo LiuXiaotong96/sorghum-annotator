@@ -45,11 +45,13 @@ class SegTool:
                     if diff < threshold :
                         queue.append(neighbour[i])
                         #queue.put(neighbour[i]);
+
                         x = neighbour[i][0]
                         y = neighbour[i][1]
                         newpointmap[x][y]=1;
                         checkmap[neighbour[i][0],neighbour[i][1]] = 7;    
-                    checkmap[neighbour[i][0], neighbour[i][1]] = checkmap[neighbour[i][0], neighbour[i][1]] + 1; 
+                    checkmap[neighbour[i][0], neighbour[i][1]] = checkmap[neighbour[i][0], neighbour[i][1]] + 1;
+        print(counter)
         return newpointmap
 
     def lasso(im, pointList):
